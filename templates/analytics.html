@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>ABES AI - Analytics</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+
+        /* ================= SIDEBAR ================= */
+
+        .sidebar {
+            width: 250px;
+            background: #111827;
+            color: white;
+            min-height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            padding: 25px 18px;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 35px;
+            padding-left: 10px;
+        }
+
+        .logo span {
+            color: #60a5fa;
+        }
+
+        .nav-title {
+            font-size: 11px;
+            color: #9ca3af;
+            margin: 20px 10px 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 12px 13px;
+            margin: 5px 0;
+            color: #d1d5db;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .nav-link:hover {
+            background: #1f2937;
+            color: white;
+        }
+
+        .nav-link.active {
+            background: #2563eb;
+            color: white;
+        }
+
+        /* ================= MAIN ================= */
+
+        .main {
+            margin-left: 250px;
+            padding: 25px;
+        }
+
+        .topbar {
+            background: white;
+            padding: 18px 22px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 22px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .topbar h2 {
+            font-size: 21px;
+        }
+
+        .admin-badge {
+            background: #eff6ff;
+            color: #2563eb;
+            padding: 7px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* ================= STATS ================= */
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin-bottom: 22px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        /* ================= FEEDBACK STATS ================= */
+
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .feedback-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin-bottom: 22px;
+        }
+
+        .feedback-card {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+        }
+
+        .feedback-icon {
+            font-size: 26px;
+            margin-bottom: 12px;
+        }
+
+        .feedback-label {
+            color: #6b7280;
+            font-size: 13px;
+            margin-bottom: 7px;
+        }
+
+        .feedback-number {
+            font-size: 27px;
+            font-weight: bold;
+        }
+
+        /* ================= CONTENT GRID ================= */
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 20px;
+            margin-bottom: 22px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 12px;
+            padding: 22px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+        }
+
+        .panel h3 {
+            font-size: 16px;
+            margin-bottom: 18px;
+        }
+
+        .chart-container {
+            height: 300px;
+        }
+
+        /* ================= TABLE ================= */
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            background: #f9fafb;
+            color: #6b7280;
+            font-size: 12px;
+            padding: 12px;
+        }
+
+        td {
+            padding: 13px 12px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13px;
+        }
+
+        .feedback-badge {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .helpful {
+            background: #ecfdf5;
+            color: #15803d;
+        }
+
+        .not-helpful {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        .question {
+            max-width: 300px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 30px;
+            color: #9ca3af;
+            font-size: 13px;
+        }
+
+        /* ================= RESPONSIVE ================= */
+
+        @media (max-width: 900px) {
+
+            .stats,
+            .feedback-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 650px) {
+
+            .sidebar {
+                display: none;
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 12px;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- ================= SIDEBAR ================= -->
+
+<div class="sidebar">
+
+    <div class="logo">
+        ABES <span>AI</span>
+    </div>
+
+    <div class="nav-title">
+        Admin Portal
+    </div>
+
+    <a href="/admin"
+       class="nav-link">
+        🏠 Dashboard
+    </a>
+
+    <a href="/admin/students"
+       class="nav-link">
+        👨‍🎓 Student Management
+    </a>
+
+    <a href="/admin/analytics"
+       class="nav-link active">
+        📊 Analytics
+    </a>
+
+    <a href="/conversations"
+       class="nav-link">
+        💬 Conversations
+    </a>
+
+    <a href="/admin/knowledge"
+       class="nav-link">
+        🧠 Knowledge Base
+    </a>
+
+    <div class="nav-title">
+        Student Area
+    </div>
+
+    <a href="/"
+       class="nav-link">
+        🤖 AI Assistant
+    </a>
+
+    <a href="/dashboard"
+       class="nav-link">
+        🏠 Student Dashboard
+    </a>
+
+    <a href="/profile"
+       class="nav-link">
+        👤 My Profile
+    </a>
+
+    <a href="/logout"
+       class="nav-link">
+        🚪 Logout
+    </a>
+
+</div>
+
+
+<!-- ================= MAIN ================= -->
+
+<div class="main">
+
+
+    <div class="topbar">
+
+        <h2>
+            Analytics Dashboard
+        </h2>
+
+        <div class="admin-badge">
+            ADMIN
+        </div>
+
+    </div>
+
+
+    <!-- ================= MAIN STATS ================= -->
+
+    <div class="stats">
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                Total Students
+            </div>
+
+            <div class="stat-value">
+                {{ total_students }}
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                Total AI Questions
+            </div>
+
+            <div class="stat-value">
+                {{ total_questions }}
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                Students Using AI
+            </div>
+
+            <div class="stat-value">
+                {{ active_students }}
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= FEEDBACK ================= -->
+
+    <div class="section-title">
+        AI Response Feedback
+    </div>
+
+
+    <div class="feedback-stats">
+
+
+        <div class="feedback-card">
+
+            <div class="feedback-icon">
+                📝
+            </div>
+
+            <div class="feedback-label">
+                Total Feedback
+            </div>
+
+            <div class="feedback-number">
+                {{ feedback_summary.total }}
+            </div>
+
+        </div>
+
+
+        <div class="feedback-card">
+
+            <div class="feedback-icon">
+                👍
+            </div>
+
+            <div class="feedback-label">
+                Helpful Responses
+            </div>
+
+            <div class="feedback-number">
+                {{ feedback_summary.helpful }}
+            </div>
+
+        </div>
+
+
+        <div class="feedback-card">
+
+            <div class="feedback-icon">
+                👎
+            </div>
+
+            <div class="feedback-label">
+                Not Helpful
+            </div>
+
+            <div class="feedback-number">
+                {{ feedback_summary.not_helpful }}
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- ================= CHART + ACTIVE STUDENTS ================= -->
+
+    <div class="content-grid">
+
+
+        <div class="panel">
+
+            <h3>
+                Daily AI Usage
+            </h3>
+
+            <div class="chart-container">
+
+                <canvas id="usageChart"></canvas>
+
+            </div>
+
+        </div>
+
+
+        <div class="panel">
+
+            <h3>
+                Most Active Students
+            </h3>
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Student
+                            </th>
+
+                            <th>
+                                Questions
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                    {% for student in student_question_counts[:5] %}
+
+                        <tr>
+
+                            <td>
+                                {{ student[0] }}
+                            </td>
+
+                            <td>
+                                {{ student[2] }}
+                            </td>
+
+                        </tr>
+
+                    {% else %}
+
+                        <tr>
+
+                            <td colspan="2"
+                                class="empty">
+
+                                No student activity yet.
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- ================= STUDENT USAGE ================= -->
+
+    <div class="panel"
+         style="margin-bottom:22px;">
+
+        <h3>
+            Student AI Usage
+        </h3>
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Student
+                        </th>
+
+                        <th>
+                            Email
+                        </th>
+
+                        <th>
+                            AI Questions
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                {% for student in student_question_counts %}
+
+                    <tr>
+
+                        <td>
+                            {{ student[0] }}
+                        </td>
+
+                        <td>
+                            {{ student[1] }}
+                        </td>
+
+                        <td>
+                            {{ student[2] }}
+                        </td>
+
+                    </tr>
+
+                {% else %}
+
+                    <tr>
+
+                        <td colspan="3"
+                            class="empty">
+
+                            No student activity available.
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= RECENT FEEDBACK ================= -->
+
+    <div class="panel">
+
+        <h3>
+            Recent AI Feedback
+        </h3>
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Student
+                        </th>
+
+                        <th>
+                            Question
+                        </th>
+
+                        <th>
+                            Feedback
+                        </th>
+
+                        <th>
+                            Date
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                {% for item in recent_feedback %}
+
+                    <tr>
+
+                        <td>
+                            {{ item[5] or "Student" }}
+                        </td>
+
+                        <td class="question">
+                            {{ item[1] }}
+                        </td>
+
+                        <td>
+
+                            {% if item[3] == "helpful" %}
+
+                                <span class="feedback-badge helpful">
+                                    👍 Helpful
+                                </span>
+
+                            {% else %}
+
+                                <span class="feedback-badge not-helpful">
+                                    👎 Not Helpful
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+                            {{ item[4] }}
+                        </td>
+
+                    </tr>
+
+                {% else %}
+
+                    <tr>
+
+                        <td colspan="4"
+                            class="empty">
+
+                            No feedback submitted yet.
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<script>
+
+
+// ======================================================
+// DAILY AI USAGE CHART
+// ======================================================
+
+const dailyLabels = [
+
+    {% for item in daily_question_counts %}
+
+        "{{ item[0] }}",
+
+    {% endfor %}
+
+];
+
+
+const dailyValues = [
+
+    {% for item in daily_question_counts %}
+
+        {{ item[1] }},
+
+    {% endfor %}
+
+];
+
+
+const chartElement =
+    document.getElementById(
+        "usageChart"
+    );
+
+
+new Chart(
+    chartElement,
+    {
+
+        type: "line",
+
+        data: {
+
+            labels: dailyLabels,
+
+            datasets: [
+
+                {
+
+                    label:
+                        "AI Questions",
+
+                    data:
+                        dailyValues,
+
+                    tension:
+                        0.3,
+
+                    fill:
+                        true
+
+                }
+
+            ]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+            plugins: {
+
+                legend: {
+                    display: true
+                }
+
+            },
+
+            scales: {
+
+                y: {
+
+                    beginAtZero: true,
+
+                    ticks: {
+                        precision: 0
+                    }
+
+                }
+
+            }
+
+        }
+
+    }
+);
+
+
+</script>
+
+
+</body>
+
+</html>

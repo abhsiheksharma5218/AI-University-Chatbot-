@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ABES AI Assistant</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="app-shell">
+
+    <!-- ================= SIDEBAR ================= -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                AI
+            </div>
+
+            <div class="brand-text">
+                <strong>ABES AI</strong>
+                <span>Student Support</span>
+            </div>
+
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <a href="/dashboard">
+                <span>⌂</span>
+                Dashboard
+            </a>
+
+            <a href="/" class="active">
+                <span>✦</span>
+                AI Assistant
+            </a>
+
+            <a href="/conversations">
+                <span>☷</span>
+                My Conversations
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <a href="/profile">
+                <span>◉</span>
+                My Profile
+            </a>
+
+            <a href="/logout">
+                <span>↪</span>
+                Logout
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <!-- ================= MAIN CONTENT ================= -->
+
+    <main class="chat-main">
+
+
+        <!-- HEADER -->
+
+        <header class="chat-header">
+
+            <div>
+
+                <h1>
+                    ABES AI Assistant
+                </h1>
+
+                <p>
+                    AI-Powered Chatbot for University Student Support
+                </p>
+
+            </div>
+
+
+            <div class="online-status">
+
+                <span class="online-dot"></span>
+
+                Online
+
+            </div>
+
+        </header>
+
+
+
+        <!-- ================= CHAT + QUICK ACTIONS ================= -->
+
+        <section class="pro-chat-layout">
+
+
+            <!-- CHAT PANEL -->
+
+            <div class="chat-panel">
+
+
+                <!-- CHAT HEADER -->
+
+                <div class="chat-panel-header">
+
+                    <div class="ai-avatar">
+                        AI
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            ABES AI Assistant
+                        </strong>
+
+                        <span>
+                            Your university support assistant
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- MESSAGES -->
+
+                <section
+                    class="messages"
+                    id="messages"
+                >
+
+
+                    <!-- WELCOME MESSAGE -->
+
+                    <div class="message bot-message">
+
+                        <div class="message-content">
+
+                            <div class="message-author">
+
+                                <span class="mini-ai">
+                                    AI
+                                </span>
+
+                                ABES AI Assistant
+
+                            </div>
+
+
+                            <div class="welcome-bubble">
+
+                                <p>
+                                    Hello! 👋
+                                </p>
+
+                                <p>
+                                    I am the ABES AI Assistant,
+                                    an AI-powered chatbot for
+                                    university student support.
+                                </p>
+
+                                <p>
+                                    I can help you with:
+                                </p>
+
+
+                                <ul>
+
+                                    <li>Admission</li>
+
+                                    <li>Courses</li>
+
+                                    <li>Exams</li>
+
+                                    <li>Fees</li>
+
+                                    <li>Placements</li>
+
+                                    <li>Hostel</li>
+
+                                    <li>Library</li>
+
+                                    <li>ECE</li>
+
+                                    <li>Scholarships</li>
+
+                                    <li>University information</li>
+
+                                </ul>
+
+
+                                <p>
+                                    How can I help you today?
+                                </p>
+
+                            </div>
+
+
+                            <span
+                                class="message-time"
+                                id="welcomeTime"
+                            ></span>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- TYPING -->
+
+                <div
+                    class="typing-indicator"
+                    id="typingIndicator"
+                >
+                    ABES AI Assistant is thinking...
+                </div>
+
+            </div>
+
+
+
+            <!-- ================= QUICK ACTIONS ================= -->
+
+            <aside class="assistant-panel">
+
+
+                <div class="assistant-panel-header">
+
+                    <div class="panel-icon">
+                        ✦
+                    </div>
+
+                    <div>
+
+                        <h2>
+                            Quick Actions
+                        </h2>
+
+                        <p>
+                            Get instant answers
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="quick-section">
+
+                    <div class="section-label">
+                        Popular Topics
+                    </div>
+
+
+                    <div class="quick-questions">
+
+
+                        <button
+                            type="button"
+                            onclick="askQuestion('How can I get admission?')"
+                        >
+                            <span>🎓</span>
+                            Admission
+                        </button>
+
+
+                        <button
+                            type="button"
+                            onclick="askQuestion('What courses are available?')"
+                        >
+                            <span>📚</span>
+                            Courses
+                        </button>
+
+
+                        <button
+                            type="button"
+                            onclick="askQuestion('What is ECE?')"
+                        >
+                            <span>⚡</span>
+                            ECE
+                        </button>
+
+
+                        <button
+                            type="button"
+                            onclick="askQuestion('What is the fee structure?')"
+                        >
+                            <span>💳</span>
+                            Fees
+                        </button>
+
+
+                        <button
+                            type="button"
+                            onclick="askQuestion('What is the placement process?')"
+                        >
+                            <span>💼</span>
+                            Placements
+                        </button>
+
+
+                        <button
+                            type="button"
+                            onclick="askQuestion('Is hostel available?')"
+                        >
+                            <span>🏠</span>
+                            Hostel
+                        </button>
+
+
+                        <button
+                            type="button"
+                            onclick="askQuestion('What are library facilities?')"
+                        >
+                            <span>📖</span>
+                            Library
+                        </button>
+
+
+                        <button
+                            type="button"
+                            onclick="askQuestion('How can I contact the college?')"
+                        >
+                            <span>☎</span>
+                            Contact
+                        </button>
+
+
+                    </div>
+
+                </div>
+
+
+                <!-- STATUS -->
+
+                <div class="assistant-status">
+
+                    <span class="status-check">
+                        ✓
+                    </span>
+
+                    <div>
+
+                        <strong>
+                            AI Support Online
+                        </strong>
+
+                        <span>
+                            Ready to help you
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </aside>
+
+        </section>
+
+
+
+        <!-- ================= ASK AI ================= -->
+
+        <div class="ask-ai-card">
+
+
+            <div class="ask-ai-title">
+
+                <div class="ask-ai-icon">
+                    💬
+                </div>
+
+                <div>
+
+                    <strong>
+                        Ask ABES AI
+                    </strong>
+
+                    <span>
+                        Ask anything about your university
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="chat-input-area">
+
+
+                <input
+                    type="text"
+                    id="messageInput"
+                    placeholder="Ask ABES AI anything..."
+                    autocomplete="off"
+                >
+
+
+                <button
+                    id="sendButton"
+                    type="button"
+                >
+                    ➤
+                </button>
+
+
+            </div>
+
+
+            <div class="input-hint">
+                Press Enter to send
+            </div>
+
+        </div>
+
+
+
+        <!-- FOOTER -->
+
+        <div class="footer-note">
+
+            AI-powered student support
+
+            <span>•</span>
+
+            Your conversations are saved securely
+
+        </div>
+
+
+    </main>
+
+</div>
+
+
+
+<!-- =====================================================
+     JAVASCRIPT
+===================================================== -->
+
+<script>
+
+
+/* ================= TIME ================= */
+
+function getCurrentTime() {
+
+    return new Date().toLocaleTimeString(
+        [],
+        {
+            hour: "2-digit",
+            minute: "2-digit"
+        }
+    );
+
+}
+
+
+
+/* ================= ESCAPE HTML ================= */
+
+function escapeHtml(text) {
+
+    const div =
+        document.createElement("div");
+
+    div.textContent = text;
+
+    return div.innerHTML;
+
+}
+
+
+
+/* ================= FORMAT AI RESPONSE ================= */
+
+function formatAIResponse(text) {
+
+    if (!text) {
+
+        return "Sorry, I could not generate an answer.";
+
+    }
+
+    let formatted =
+        escapeHtml(text);
+
+    formatted =
+        formatted.replace(
+            /\*\*(.*?)\*\*/g,
+            "<strong>$1</strong>"
+        );
+
+    formatted =
+        formatted.replace(
+            /\n/g,
+            "<br>"
+        );
+
+    return formatted;
+
+}
+
+
+
+/* ================= USER MESSAGE ================= */
+
+function addUserMessage(text) {
+
+    const messages =
+        document.getElementById("messages");
+
+    if (!messages) return;
+
+
+    const message =
+        document.createElement("div");
+
+    message.className =
+        "message user-message";
+
+
+    message.innerHTML = `
+
+        <div class="message-content">
+
+            <div class="message-author user-author">
+                You
+            </div>
+
+            <div class="user-bubble">
+                ${escapeHtml(text)}
+            </div>
+
+            <span class="message-time">
+                ${getCurrentTime()}
+            </span>
+
+        </div>
+
+    `;
+
+
+    messages.appendChild(message);
+
+    scrollToBottom();
+
+}
+
+
+
+/* ================= BOT MESSAGE ================= */
+
+function addBotMessage(text) {
+
+    const messages =
+        document.getElementById("messages");
+
+    if (!messages) return;
+
+
+    const message =
+        document.createElement("div");
+
+    message.className =
+        "message bot-message";
+
+
+    message.innerHTML = `
+
+        <div class="message-content">
+
+            <div class="message-author">
+
+                <span class="mini-ai">
+                    AI
+                </span>
+
+                ABES AI Assistant
+
+            </div>
+
+
+            <div class="ai-response-bubble">
+
+                ${formatAIResponse(text)}
+
+            </div>
+
+
+            <span class="message-time">
+
+                ${getCurrentTime()}
+
+            </span>
+
+
+            <div class="feedback-area">
+
+                <button
+                    type="button"
+                    onclick="sendFeedback('helpful', this)"
+                >
+                    👍 Helpful
+                </button>
+
+
+                <button
+                    type="button"
+                    onclick="sendFeedback('not_helpful', this)"
+                >
+                    👎 Not Helpful
+                </button>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    messages.appendChild(message);
+
+    scrollToBottom();
+
+}
+
+
+
+/* ================= SCROLL ================= */
+
+function scrollToBottom() {
+
+    const messages =
+        document.getElementById("messages");
+
+    if (!messages) return;
+
+    messages.scrollTop =
+        messages.scrollHeight;
+
+}
+
+
+
+/* ================= QUICK QUESTION ================= */
+
+function askQuestion(question) {
+
+    const input =
+        document.getElementById("messageInput");
+
+    if (!input) return;
+
+    input.value =
+        question;
+
+    input.focus();
+
+    sendMessage();
+
+}
+
+
+
+/* ================= SEND MESSAGE ================= */
+
+async function sendMessage() {
+
+    const input =
+        document.getElementById("messageInput");
+
+    const button =
+        document.getElementById("sendButton");
+
+    const typing =
+        document.getElementById("typingIndicator");
+
+
+    if (!input || !button) {
+
+        console.error(
+            "Chat input or send button not found."
+        );
+
+        return;
+
+    }
+
+
+    const message =
+        input.value.trim();
+
+
+    if (!message) {
+
+        input.focus();
+
+        return;
+
+    }
+
+
+    /* Show user message */
+
+    addUserMessage(message);
+
+
+    /* Clear input */
+
+    input.value = "";
+
+
+    /* Disable button */
+
+    button.disabled = true;
+
+
+    /* Show typing */
+
+    if (typing) {
+
+        typing.style.display =
+            "block";
+
+    }
+
+
+    try {
+
+
+        const response =
+            await fetch(
+                "/chat",
+                {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify({
+                            message:
+                                message
+                        })
+
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        console.log(
+            "Chatbot response:",
+            data
+        );
+
+
+        /* Server error */
+
+        if (!response.ok) {
+
+            addBotMessage(
+                data.error ||
+                "Sorry, something went wrong."
+            );
+
+            return;
+
+        }
+
+
+        /* Normal response */
+
+        if (data.response) {
+
+            addBotMessage(
+                data.response
+            );
+
+        }
+
+        else if (data.message) {
+
+            addBotMessage(
+                data.message
+            );
+
+        }
+
+        else {
+
+            addBotMessage(
+                "Sorry, I could not generate an answer."
+            );
+
+        }
+
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Chat error:",
+            error
+        );
+
+
+        addBotMessage(
+            "Sorry, I could not connect to the chatbot server."
+        );
+
+    }
+
+
+    finally {
+
+        if (typing) {
+
+            typing.style.display =
+                "none";
+
+        }
+
+
+        button.disabled =
+            false;
+
+
+        input.focus();
+
+    }
+
+}
+
+
+
+/* ================= FEEDBACK ================= */
+
+async function sendFeedback(
+    type,
+    button
+) {
+
+    try {
+
+        await fetch(
+            "/feedback",
+            {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+
+                body:
+                    JSON.stringify({
+
+                        rating:
+                            type,
+
+                        user_message:
+                            "",
+
+                        bot_response:
+                            ""
+
+                    })
+
+            }
+        );
+
+    }
+
+    catch (error) {
+
+        console.log(
+            "Feedback error:",
+            error
+        );
+
+    }
+
+
+    const parent =
+        button.parentElement;
+
+
+    if (parent) {
+
+        parent.innerHTML = `
+
+            <span class="feedback-thanks">
+
+                Thank you for your feedback! 😊
+
+            </span>
+
+        `;
+
+    }
+
+}
+
+
+
+/* ================= PAGE LOAD ================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+
+        const input =
+            document.getElementById(
+                "messageInput"
+            );
+
+
+        const button =
+            document.getElementById(
+                "sendButton"
+            );
+
+
+        const welcomeTime =
+            document.getElementById(
+                "welcomeTime"
+            );
+
+
+        /* Welcome time */
+
+        if (welcomeTime) {
+
+            welcomeTime.textContent =
+                getCurrentTime();
+
+        }
+
+
+        /* Safety check */
+
+        if (!input || !button) {
+
+            console.error(
+                "Chat input elements not found."
+            );
+
+            return;
+
+        }
+
+
+        /* Send button */
+
+        button.addEventListener(
+            "click",
+            function () {
+
+                sendMessage();
+
+            }
+        );
+
+
+        /* Enter key */
+
+        input.addEventListener(
+            "keydown",
+            function (event) {
+
+                if (
+                    event.key === "Enter" &&
+                    !event.shiftKey
+                ) {
+
+                    event.preventDefault();
+
+                    sendMessage();
+
+                }
+
+            }
+        );
+
+
+        /* Focus input */
+
+        input.focus();
+
+    }
+);
+
+</script>
+
+</body>
+
+</html>

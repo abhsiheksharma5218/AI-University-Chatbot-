@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>ABES AI | Student Details</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            background: #f5f7fb;
+            color: #1f2937;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR */
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            height: 100vh;
+            background: #111827;
+            color: white;
+            padding: 25px 18px;
+        }
+
+        .brand {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 35px;
+            padding-left: 10px;
+        }
+
+        .brand span {
+            color: #60a5fa;
+        }
+
+        .section-title {
+            font-size: 12px;
+            color: #9ca3af;
+            text-transform: uppercase;
+            margin: 20px 10px 10px;
+            letter-spacing: 1px;
+        }
+
+        .nav-link {
+            display: block;
+            text-decoration: none;
+            color: #d1d5db;
+            padding: 12px 14px;
+            margin: 5px 0;
+            border-radius: 10px;
+        }
+
+        .nav-link:hover {
+            background: #1f2937;
+            color: white;
+        }
+
+        .nav-link.active {
+            background: #2563eb;
+            color: white;
+        }
+
+        /* MAIN */
+
+        .main {
+            margin-left: 250px;
+            padding: 35px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .topbar h1 {
+            font-size: 30px;
+            margin-bottom: 6px;
+        }
+
+        .topbar p {
+            color: #6b7280;
+        }
+
+        .admin-badge {
+            background: white;
+            padding: 10px 16px;
+            border-radius: 12px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.06);
+            font-weight: bold;
+        }
+
+        /* PROFILE HEADER */
+
+        .profile-header {
+            background: linear-gradient(
+                135deg,
+                #2563eb,
+                #1e40af
+            );
+
+            color: white;
+            border-radius: 20px;
+            padding: 30px;
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .avatar {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: white;
+            color: #2563eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 35px;
+            font-weight: bold;
+        }
+
+        .profile-header h2 {
+            font-size: 26px;
+            margin-bottom: 7px;
+        }
+
+        .profile-header p {
+            opacity: 0.9;
+        }
+
+        .status {
+            margin-top: 12px;
+            display: inline-block;
+            background: rgba(255,255,255,0.18);
+            padding: 7px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+        }
+
+        /* INFORMATION */
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 18px;
+            padding: 25px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+        }
+
+        .card h3 {
+            margin-bottom: 22px;
+            font-size: 19px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 16px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .label {
+            color: #6b7280;
+        }
+
+        .value {
+            font-weight: bold;
+            text-align: right;
+        }
+
+        /* STATUS CARD */
+
+        .status-card {
+            text-align: center;
+        }
+
+        .status-circle {
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+            background: #dcfce7;
+            color: #16a34a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin: 10px auto 20px;
+        }
+
+        .online {
+            color: #16a34a;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .status-description {
+            color: #6b7280;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* ACTIONS */
+
+        .actions {
+            margin-top: 25px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .button {
+            display: inline-block;
+            text-decoration: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        .primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .primary:hover {
+            background: #1d4ed8;
+        }
+
+        .secondary:hover {
+            background: #d1d5db;
+        }
+
+        /* RESPONSIVE */
+
+        @media (max-width: 900px) {
+
+            .sidebar {
+                width: 210px;
+            }
+
+            .main {
+                margin-left: 210px;
+                padding: 25px;
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+        @media (max-width: 650px) {
+
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .info-row {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .value {
+                text-align: left;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+            🤖 ABES <span>AI</span>
+        </div>
+
+        <div class="section-title">
+            Admin Portal
+        </div>
+
+        <a href="/admin"
+           class="nav-link">
+            🏠 Dashboard
+        </a>
+
+        <a href="/admin/students"
+           class="nav-link active">
+            👥 Students
+        </a>
+
+        <a href="/conversations"
+           class="nav-link">
+            💬 Conversations
+        </a>
+
+        <div class="section-title">
+            System
+        </div>
+
+        <a href="/"
+           class="nav-link">
+            🤖 Student Chatbot
+        </a>
+
+        <a href="/logout"
+           class="nav-link">
+            🚪 Logout
+        </a>
+
+    </aside>
+
+
+    <!-- MAIN -->
+
+    <main class="main">
+
+
+        <div class="topbar">
+
+            <div>
+
+                <h1>
+                    Student Details
+                </h1>
+
+                <p>
+                    View student account information.
+                </p>
+
+            </div>
+
+            <div class="admin-badge">
+                🛡️ Administrator
+            </div>
+
+        </div>
+
+
+        <!-- PROFILE HEADER -->
+
+        <div class="profile-header">
+
+            <div class="avatar">
+                {{ student[1][0]|upper }}
+            </div>
+
+            <div>
+
+                <h2>
+                    {{ student[1] }}
+                </h2>
+
+                <p>
+                    {{ student[2] }}
+                </p>
+
+                <div class="status">
+                    🟢 Active Student Account
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- CONTENT -->
+
+        <div class="content-grid">
+
+
+            <!-- ACCOUNT INFORMATION -->
+
+            <div class="card">
+
+                <h3>
+                    👤 Account Information
+                </h3>
+
+                <div class="info-row">
+
+                    <span class="label">
+                        Student ID
+                    </span>
+
+                    <span class="value">
+                        #{{ student[0] }}
+                    </span>
+
+                </div>
+
+
+                <div class="info-row">
+
+                    <span class="label">
+                        Full Name
+                    </span>
+
+                    <span class="value">
+                        {{ student[1] }}
+                    </span>
+
+                </div>
+
+
+                <div class="info-row">
+
+                    <span class="label">
+                        Email Address
+                    </span>
+
+                    <span class="value">
+                        {{ student[2] }}
+                    </span>
+
+                </div>
+
+
+                <div class="info-row">
+
+                    <span class="label">
+                        Account Role
+                    </span>
+
+                    <span class="value">
+                        {{ student[3]|capitalize }}
+                    </span>
+
+                </div>
+
+
+                <div class="info-row">
+
+                    <span class="label">
+                        Registration Date
+                    </span>
+
+                    <span class="value">
+                        {{ student[4] }}
+                    </span>
+
+                </div>
+
+
+            </div>
+
+
+            <!-- ACCOUNT STATUS -->
+
+            <div class="card status-card">
+
+                <h3>
+                    System Status
+                </h3>
+
+                <div class="status-circle">
+                    ✓
+                </div>
+
+                <div class="online">
+                    Account Active
+                </div>
+
+                <p class="status-description">
+                    This student account is registered
+                    in the ABES AI Student Support System
+                    and is currently available.
+                </p>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- ACTIONS -->
+
+        <div class="actions">
+
+            <a
+                href="/admin/students"
+                class="button secondary"
+            >
+                ← Back to Students
+            </a>
+
+            <a
+                href="/"
+                class="button primary"
+            >
+                🤖 Open AI Chatbot
+            </a>
+
+        </div>
+
+
+    </main>
+
+
+</body>
+
+</html>

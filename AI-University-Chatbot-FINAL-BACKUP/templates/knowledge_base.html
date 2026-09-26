@@ -1,0 +1,724 @@
+from flask import Flask, render_template, request, jsonify, redirect, session
+
+from chatbot import get_response
+
+from database import (
+    create_database,
+    migrate_database,
+    save_chat,
+    get_chat_history,
+    get_total_questions,
+    get_total_users,
+    get_recent_chats,
+    get_all_students,
+    search_students,
+    get_total_students,
+    get_student_by_id,
+    get_student_question_counts,
+    get_daily_question_counts,
+    get_active_student_count,
+    get_knowledge_base,
+    add_knowledge,
+    delete_knowledge
+)
+
+from auth import (
+    create_users_table,
+    register_user,
+    login_user
+)
+
+import sqlite3
+
+
+# =========================================================
+# ABES AI UNIVERSITY STUDENT SUPPORT SYSTEM
+# =========================================================
+
+app = Flask(__name__)
+
+app.secret_key = "abes_ai_chatbot_secret_key"
+
+
+# =========================================================
+# DATABASE INITIALIZATION
+# =========================================================
+
+create_database()
+migrate_database()
+create_users_table()
+
+
+# =========================================================
+# HOME / AI CHATBOT
+# =========================================================
+
+@app.route("/")
+def home():
+
+    if "user_id" not in session:
+        return redirect("/login")
+
+    return render_template("index.html")
+
+
+# =========================================================
+# STUDENT REGISTRATION
+# =========================================================
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+
+    if request.method == "POST":
+
+        name = request.form.get("name", "").strip()
+        email = request.form.get("email", "").strip()
+        password = request.form.get("password", "")
+
+        if not name or not email or not password:
+
+            return """
+            <h2>All fields are required.</h2>
+            <a href="/register">Go Back</a>
+            """
+
+        success, message = register_user(
+            name,
+            email,
+            password
+        )
+
+        if success:
+            return redirect("/login")
+
+        return f"""
+        <h2>{message}</h2>
+        <a href="/register">Go Back</a>
+        """
+
+    return render_template("register.html")
+
+
+# =========================================================
+# LOGIN
+# =========================================================
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+
+    if request.method == "POST":
+
+        email = request.form.get(
+            "email",
+            ""
+        ).strip()
+
+        password = request.form.get(
+            "password",
+            ""
+        )
+
+        user = login_user(
+            email,
+            password
+        )
+
+        if user:
+
+            session["user_id"] = user["id"]
+
+            session["user_name"] = user["name"]
+
+            session["user_email"] = user["email"]
+
+            session["user_role"] = user["role"]
+
+            if user["role"] == "admin":
+                return redirect("/admin")
+
+            return redirect("/dashboard")
+
+        return """
+        <h2>Invalid email or password.</h2>
+        <a href="/login">Try Again</a>
+        """
+
+    return render_template("login.html")
+
+
+# =========================================================
+# LOGOUT
+# =========================================================
+
+@app.route("/logout")
+def logout():
+
+    session.clear()
+
+    return redirect("/login")
+
+
+# =========================================================
+# AI CHAT
+# =========================================================
+
+@app.route("/chat", methods=["POST"])
+def chat():
+
+    if "user_id" not in session:
+
+        return jsonify({
+            "response": "Please login first."
+        }), 401
+
+    data = request.get_json(
+        silent=True
+    ) or {}
+
+    user_message = data.get(
+        "message",
+        ""
+    ).strip()
+
+    if not user_message:
+
+        return jsonify({
+            "response": "Please type your question."
+        })
+
+    bot_response = get_response(
+        user_message
+    )
+
+    save_chat(
+        session["user_id"],
+        user_message,
+        bot_response
+    )
+
+    return jsonify({
+        "response": bot_response
+    })
+
+
+# =========================================================
+# STUDENT CHAT HISTORY API
+# =========================================================
+
+@app.route("/history")
+def history():
+
+    if "user_id" not in session:
+
+        return jsonify({
+            "error": "Login required"
+        }), 401
+
+    chats = get_chat_history(
+        session["user_id"]
+    )
+
+    history_data = []
+
+    for chat in chats:
+
+        history_data.append({
+            "user": chat[0],
+            "bot": chat[1],
+            "time": chat[2]
+        })
+
+    return jsonify(
+        history_data
+    )
+
+
+# =========================================================
+# PROFESSIONAL CONVERSATIONS PAGE
+# =========================================================
+
+@app.route("/conversations")
+def conversations():
+
+    if "user_id" not in session:
+
+        return redirect("/login")
+
+    chats = get_chat_history(
+        session["user_id"]
+    )
+
+    total_conversations = len(chats)
+
+    return render_template(
+        "conversations.html",
+        chats=chats,
+        total_conversations=total_conversations
+    )
+
+
+# =========================================================
+# ADMIN DASHBOARD
+# =========================================================
+
+@app.route("/admin")
+def admin_dashboard():
+
+    if "user_id" not in session:
+
+        return redirect("/login")
+
+    if session.get(
+        "user_role"
+    ) != "admin":
+
+        return """
+        <h2>Access Denied</h2>
+
+        <p>
+            You are not authorized to access
+            the Admin Dashboard.
+        </p>
+
+        <a href="/dashboard">
+            Go to Student Dashboard
+        </a>
+        """, 403
+
+    total_users = get_total_users()
+
+    total_students = get_total_students()
+
+    total_questions = get_total_questions()
+
+    recent_chats = get_recent_chats(
+        10
+    )
+
+    return render_template(
+        "admin.html",
+        total_users=total_users,
+        total_students=total_students,
+        total_questions=total_questions,
+        recent_chats=recent_chats
+    )
+
+
+# =========================================================
+# ADMIN STUDENT MANAGEMENT
+# =========================================================
+
+@app.route("/admin/students")
+def admin_students():
+
+    if "user_id" not in session:
+
+        return redirect("/login")
+
+    if session.get(
+        "user_role"
+    ) != "admin":
+
+        return """
+        <h2>Access Denied</h2>
+
+        <p>
+            Admin access is required.
+        </p>
+
+        <a href="/dashboard">
+            Go to Dashboard
+        </a>
+        """, 403
+
+    search = request.args.get(
+        "search",
+        ""
+    ).strip()
+
+    if search:
+
+        students = search_students(
+            search
+        )
+
+    else:
+
+        students = get_all_students()
+
+    total_students = get_total_students()
+
+    return render_template(
+        "students.html",
+        students=students,
+        total_students=total_students,
+        search=search
+    )
+
+
+# =========================================================
+# STUDENT DETAILS
+# =========================================================
+
+@app.route("/admin/students/<int:student_id>")
+def student_details(student_id):
+
+    if "user_id" not in session:
+
+        return redirect("/login")
+
+    if session.get(
+        "user_role"
+    ) != "admin":
+
+        return """
+        <h2>Access Denied</h2>
+        """, 403
+
+    student = get_student_by_id(
+        student_id
+    )
+
+    if not student:
+
+        return """
+        <h2>Student Not Found</h2>
+
+        <a href="/admin/students">
+            Back to Students
+        </a>
+        """, 404
+
+    return render_template(
+        "student_details.html",
+        student=student
+    )
+
+
+# =========================================================
+# ADMIN ANALYTICS
+# =========================================================
+
+@app.route("/admin/analytics")
+def admin_analytics():
+
+    if "user_id" not in session:
+
+        return redirect("/login")
+
+    if session.get(
+        "user_role"
+    ) != "admin":
+
+        return """
+        <h2>Access Denied</h2>
+
+        <p>
+            Admin access is required.
+        </p>
+
+        <a href="/dashboard">
+            Go to Dashboard
+        </a>
+        """, 403
+
+    total_students = get_total_students()
+
+    total_questions = get_total_questions()
+
+    active_students = get_active_student_count()
+
+    student_question_counts = (
+        get_student_question_counts()
+    )
+
+    daily_question_counts = (
+        get_daily_question_counts()
+    )
+
+    return render_template(
+        "analytics.html",
+        total_students=total_students,
+        total_questions=total_questions,
+        active_students=active_students,
+        student_question_counts=student_question_counts,
+        daily_question_counts=daily_question_counts
+    )
+
+
+# =========================================================
+# ADMIN KNOWLEDGE BASE
+# =========================================================
+
+@app.route("/admin/knowledge")
+def admin_knowledge():
+
+    if "user_id" not in session:
+
+        return redirect("/login")
+
+    if session.get(
+        "user_role"
+    ) != "admin":
+
+        return """
+        <h2>Access Denied</h2>
+
+        <p>
+            Admin access is required.
+        </p>
+
+        <a href="/dashboard">
+            Go to Dashboard
+        </a>
+        """, 403
+
+    knowledge = get_knowledge_base()
+
+    return render_template(
+        "knowledge_base.html",
+        knowledge=knowledge
+    )
+
+
+# =========================================================
+# ADD KNOWLEDGE
+# =========================================================
+
+@app.route(
+    "/admin/knowledge/add",
+    methods=["POST"]
+)
+def admin_add_knowledge():
+
+    if "user_id" not in session:
+
+        return redirect("/login")
+
+    if session.get(
+        "user_role"
+    ) != "admin":
+
+        return """
+        <h2>Access Denied</h2>
+        """, 403
+
+    question = request.form.get(
+        "question",
+        ""
+    ).strip()
+
+    answer = request.form.get(
+        "answer",
+        ""
+    ).strip()
+
+    category = request.form.get(
+        "category",
+        "General"
+    ).strip()
+
+    if question and answer:
+
+        add_knowledge(
+            question,
+            answer,
+            category
+        )
+
+    return redirect(
+        "/admin/knowledge"
+    )
+
+
+# =========================================================
+# DELETE KNOWLEDGE
+# =========================================================
+
+@app.route(
+    "/admin/knowledge/delete/<int:knowledge_id>",
+    methods=["POST"]
+)
+def admin_delete_knowledge(
+    knowledge_id
+):
+
+    if "user_id" not in session:
+
+        return redirect("/login")
+
+    if session.get(
+        "user_role"
+    ) != "admin":
+
+        return """
+        <h2>Access Denied</h2>
+        """, 403
+
+    delete_knowledge(
+        knowledge_id
+    )
+
+    return redirect(
+        "/admin/knowledge"
+    )
+
+
+# =========================================================
+# STUDENT DASHBOARD
+# =========================================================
+
+@app.route("/dashboard")
+def student_dashboard():
+
+    if "user_id" not in session:
+
+        return redirect("/login")
+
+    return render_template(
+        "dashboard.html"
+    )
+
+
+# =========================================================
+# STUDENT PROFILE
+# =========================================================
+
+@app.route("/profile")
+def profile():
+
+    if "user_id" not in session:
+
+        return redirect("/login")
+
+    connection = sqlite3.connect(
+        "chatbot.db"
+    )
+
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        SELECT
+            id,
+            name,
+            email,
+            role,
+            created_at
+
+        FROM users
+
+        WHERE id = ?
+    """, (
+        session["user_id"],
+    ))
+
+    user = cursor.fetchone()
+
+    connection.close()
+
+    if not user:
+
+        session.clear()
+
+        return redirect("/login")
+
+    return render_template(
+        "profile.html",
+        user=user
+    )
+
+
+# =========================================================
+# PROFILE API
+# =========================================================
+
+@app.route("/api/profile")
+def profile_api():
+
+    if "user_id" not in session:
+
+        return jsonify({
+            "error": "Login required"
+        }), 401
+
+    connection = sqlite3.connect(
+        "chatbot.db"
+    )
+
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        SELECT
+            id,
+            name,
+            email,
+            password,
+            role,
+            created_at
+
+        FROM users
+
+        WHERE id = ?
+    """, (
+        session["user_id"],
+    ))
+
+    user = cursor.fetchone()
+
+    connection.close()
+
+    if not user:
+
+        return jsonify({
+            "error": "User not found"
+        }), 404
+
+    return jsonify({
+        "id": user[0],
+        "name": user[1],
+        "email": user[2],
+        "role": user[4],
+        "created_at": user[5],
+        "status": "Active"
+    })
+
+
+# =========================================================
+# SYSTEM STATUS API
+# =========================================================
+
+@app.route("/api/system-status")
+def system_status():
+
+    if "user_id" not in session:
+
+        return jsonify({
+            "error": "Login required"
+        }), 401
+
+    return jsonify({
+        "system":
+            "ABES AI Student Support System",
+
+        "status":
+            "Online",
+
+        "ai_assistant":
+            "Available",
+
+        "database":
+            "Connected"
+    })
+
+
+# =========================================================
+# APPLICATION START
+# =========================================================
+
+if __name__ == "__main__":
+
+    app.run(
+        debug=True,
+        host="127.0.0.1",
+        port=5000
+    )
